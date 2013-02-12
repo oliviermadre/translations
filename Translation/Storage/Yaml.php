@@ -51,9 +51,7 @@ class Translation_Storage_Yaml extends Translation_Storage_Abstract implements T
     public function getAll() {
         $this->init();
         
-        
-        
-        return false;
+        return $this->files;
     }
 
     public function set($key, $lang, $value) {
