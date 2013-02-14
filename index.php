@@ -37,11 +37,22 @@ echo "# IT : " . t("pays", 'it') . "#" . '<br />';
 echo "# DE : " . t("pays", 'de') . "#" . '<br />';
 echo "# CH : " . t("pays", 'ch') . "#" . '<br />';
 
+$vo1 = new DummyVO();
+$vo1->populate(array('id' => 1, 'translation_id' => 100));
+
+
+echo t($vo1->name, 'de') . '<br />';
+echo t($vo1->name, 'fr') . '<br />';
+echo t($vo1->name, 'es') . '<br />';
+echo t($vo1->name, 'it') . '<br />';
+
 
 
 ?><pre><?php var_dump(Translation_Manager::getInstance()->getNotFounds()); ?></pre><?php
 
 
 ?><pre><?php var_dump(Translation_Manager::getInstance()->dumpCacheLevel1()); ?></pre><?php
+
+?><pre><?php var_dump($vo1); ?></pre><?php
 
 Translation_Manager::getInstance()->storeTranslation("pa:ys", "ch", "pay:che");
