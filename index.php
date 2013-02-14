@@ -6,6 +6,9 @@ require_once './Initialize.php';
 
 spl_autoload_register(function($className) {
    $str = str_replace('_', '/', $className);
+   $str = str_replace('\\','/', $str);
+   $str = str_replace('Symfony/Component/', '', $str);
+   
     if (file_exists('./' . $str . '.php')) {
         require_once './' . $str . '.php';
         return true;
@@ -41,4 +44,4 @@ echo "# CH : " . t("pays", 'ch') . "#" . '<br />';
 
 ?><pre><?php var_dump(Translation_Manager::getInstance()->dumpCacheLevel1()); ?></pre><?php
 
-Translation_Manager::getInstance()->storeTranslation("pays", "ch", "payche");
+Translation_Manager::getInstance()->storeTranslation("pa:ys", "ch", "pay:che");

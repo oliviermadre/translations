@@ -32,7 +32,7 @@ class Translation_Storage_Yaml extends Translation_Storage_Abstract implements T
             foreach($this->files as $key => $value) {
                 if (file_exists($key)) {
                     try {
-                        $result = Yaml_Service::load($key);
+                        $result = \Symfony\Component\Yaml\Yaml::parse($key);
                         $this->files[$key] = $result;
                     }
                     catch (Exception $e) {
@@ -77,7 +77,7 @@ class Translation_Storage_Yaml extends Translation_Storage_Abstract implements T
         try {
             if ($this->fileWritable) {
                 if (!$this->fileWritableYamlDATA) {
-                    $yamlData = Yaml_Service::load($this->fileWritable);
+                    $yamlData = \Symfony\Component\Yaml\Yaml::parse($this->fileWritable);
                     $this->fileWritableYamlDATA = $yamlData;
                 }
                 
@@ -93,7 +93,7 @@ class Translation_Storage_Yaml extends Translation_Storage_Abstract implements T
                 $this->fileWritableYamlDATA[$key][$lang] = $value;
                 $this->files[$this->fileWritable][$key][$lang] = $value;
                 
-                $yamlToWrite = Yaml_Service::dump($this->fileWritableYamlDATA);
+                $yamlToWrite = \Symfony\Component\Yaml\Yaml::dump($this->fileWritableYamlDATA);
                 
                 
                 $res = file_put_contents($this->fileWritable, $yamlToWrite);
