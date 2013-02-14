@@ -7,6 +7,7 @@ class Initializer {
         
         $yaml = new Translation_Storage_Yaml();
         $yaml->addFile('./test.yml');
+        $yaml->addFile('./test2.yml', true);
         
         $translator->registerStorage('yaml', $yaml);
         

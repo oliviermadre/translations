@@ -9,9 +9,9 @@ class Translation_Storage_RuntimeArray extends Translation_Storage_Abstract impl
      * @return string|boolean
      */
     public function get($key, $lang) {
-        if (array_key_exists($lang, $this->array)) {
-            if (array_key_exists($key, $this->array[$lang])) {
-                return $this->array[$lang][$key];
+        if (array_key_exists($key, $this->array)) {
+            if (array_key_exists($lang, $this->array[$key])) {
+                return $this->array[$key][$lang];
             }
         }
         
@@ -34,11 +34,11 @@ class Translation_Storage_RuntimeArray extends Translation_Storage_Abstract impl
      * @return boolean
      */
     public function set($key, $lang, $value) {
-        if (!array_key_exists($lang, $this->array)) {
-            $this->array[$lang] = array();
+        if (!array_key_exists($key, $this->array)) {
+            $this->array[$key] = array();
         }
         
-        $this->array[$lang][$key] = $value;
+        $this->array[$key][$lang] = $value;
         
         return true;
     }

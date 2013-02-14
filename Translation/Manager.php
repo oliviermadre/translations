@@ -67,11 +67,11 @@ class Translation_Manager {
      */
     protected function addNotFound($key, $lang) {
         trigger_error("Translation error, key not found '" . $key . "' (lang = '" . $lang . "')", E_USER_NOTICE);
-        if (!array_key_exists($lang, $this->notFounds)) {
-            $this->notFounds[$lang] = array();
+        if (!array_key_exists($key, $this->notFounds)) {
+            $this->notFounds[$key] = array();
         }
         
-        $this->notFounds[$lang][] = $key;
+        $this->notFounds[$key][] = $lang;
         
         return $this;
     }

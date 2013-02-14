@@ -1,6 +1,6 @@
 <?php
 date_default_timezone_set('Europe/Paris');
-ini_set('display_errors', false);
+ini_set('display_errors', true);
 
 require_once './Initialize.php';
 
@@ -24,8 +24,21 @@ echo "# XX : " . t("maison") . "#" . '<br />';
 echo "# FR : " . t("maison", 'fr') . "#" . '<br />';
 echo "# EN : " . t("maison", 'en') . "#" . '<br />';
 echo "# ES : " . t("maison", 'es') . "#" . '<br />';
+echo '<br />';
+
+echo "# XX : " . t("pays") . "#" . '<br />';
+echo "# FR : " . t("pays", 'fr') . "#" . '<br />';
+echo "# EN : " . t("pays", 'en') . "#" . '<br />';
+echo "# ES : " . t("pays", 'es') . "#" . '<br />';
+echo "# IT : " . t("pays", 'it') . "#" . '<br />';
+echo "# DE : " . t("pays", 'de') . "#" . '<br />';
+echo "# CH : " . t("pays", 'ch') . "#" . '<br />';
+
+
 
 ?><pre><?php var_dump(Translation_Manager::getInstance()->getNotFounds()); ?></pre><?php
 
 
 ?><pre><?php var_dump(Translation_Manager::getInstance()->dumpCacheLevel1()); ?></pre><?php
+
+Translation_Manager::getInstance()->storeTranslation("pays", "ch", "payche");
