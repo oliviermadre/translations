@@ -86,8 +86,12 @@ class Translation_Storage_Yaml extends Translation_Storage_Abstract implements T
                     $this->fileWritableYamlDATA[$key] = array();
                 }
                 
-                $this->fileWritableYamlDATA[$key][$lang] = $value;
+                if (!array_key_exists($key, $this->files[$this->fileWritable])) {
+                    $this->files[$this->fileWritable][$key] = array();
+                }
                 
+                $this->fileWritableYamlDATA[$key][$lang] = $value;
+                $this->files[$this->fileWritable][$key][$lang] = $value;
                 
                 $yamlToWrite = Yaml_Service::dump($this->fileWritableYamlDATA);
                 
