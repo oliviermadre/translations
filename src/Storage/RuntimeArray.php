@@ -42,4 +42,19 @@ class Translation_Storage_RuntimeArray extends Translation_Storage_Abstract impl
         
         return true;
     }
+
+    public function deleteKeys ($keys){
+        // Todo : to be implemented
+    }
+
+    public function invert($value, $lang) {
+        foreach($this->array as $key => $langs) {
+            if (array_key_exists($lang, $langs)) {
+                if (in_array($value, $langs[$lang])) {
+                    return $key;
+                }
+            }
+        }
+        return false;
+    }
 }
