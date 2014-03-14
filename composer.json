@@ -15,9 +15,6 @@
             "role": "Developer"
         }
     ],
-    "require": {
-        "ext-memcached" : "*"
-    },
     "autoload" : {
         "psr-0" : {
             "" : "src/"
