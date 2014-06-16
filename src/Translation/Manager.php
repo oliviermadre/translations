@@ -51,7 +51,7 @@ class Translation_Manager {
      * @param  string          $locale      the application locale
      * @throws LogicException               the locale is null or is not a string
      */
-    public function setLocale($locale) {
+    public function setLocale($locale) {
         if (!$locale || !is_string($locale)) {
             throw new LogicException('Language must be a string, usually an iso2 code');
         }
@@ -62,7 +62,7 @@ class Translation_Manager {
     /**
      * Get the locale
      */
-    public function getLocale() {
+    public function getLocale() {
         return $this->locale;
     }
 
