@@ -48,8 +48,8 @@ class Translation_Manager {
     /**
      * Set the current locale
      *
-     * @param   string      $locale     the application locale
-     * @throws LogicException
+     * @param  string          $locale      the application locale
+     * @throws LogicException               the locale is null or is not a string
      */
     public function setLocale($locale) {
         if (!$locale || !is_string($locale)) {
@@ -61,9 +61,6 @@ class Translation_Manager {
 
     /**
      * Get the locale
-     *
-     * @param   string      $locale     the application locale
-     * @throws LogicException
      */
     public function getLocale() {
         return $this->locale;
