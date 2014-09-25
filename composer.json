@@ -1,9 +1,9 @@
 {
-    "name": "oliviermadre/translations",
+    "name": "evaneos/translations",
     "description": "A tool to improve translation storage",
     "version": "0.1.0",
     "type": "library",
-    "homepage" : "http://github.com/oliviermadre/translations",
+    "homepage" : "http://github.com/evaneos/translations",
     "keywords": [],
     "time": "2013-09-26",
     "license": "MIT",
