@@ -1,5 +1,6 @@
 <?php
-class Translation_Storage_Memcached extends Translation_Storage_Abstract implements Translation_Storage_Interface {
+class Translation_Storage_Memcached extends Translation_Storage_Abstract implements Translation_Storage_Interface
+{
     protected $memcached = null;
     protected $host = null;
     protected $port = null;
@@ -7,16 +8,18 @@ class Translation_Storage_Memcached extends Translation_Storage_Abstract impleme
     protected $mcKnownKeys = 'MEMCACHED_CACHE_KNOWN_KEYS';
     protected $mcPrefixKey = 'TR:MC:STORE:';
     
-    public function __construct(Memcached $instance = null) {
+    public function __construct(Memcached $instance = null)
+    {
         $this->memcached = $instance;
     }
     
     /**
-     * 
+     *
      * @param Memcached $instance
      * @return Translation_Storage_Memcached
      */
-    public function setMemcachedInstance(Memcached $instance) {
+    public function setMemcachedInstance(Memcached $instance)
+    {
         $this->memcached = $instance;
         return $this;
     }
@@ -25,7 +28,8 @@ class Translation_Storage_Memcached extends Translation_Storage_Abstract impleme
      * @param string $value
      * @return Translation_Storage_Memcached
      */
-    public function setMemcachedKnownKeysKey($value) {
+    public function setMemcachedKnownKeysKey($value)
+    {
         $this->mcKnownKeys = $value;
         return $this;
     }
@@ -34,12 +38,14 @@ class Translation_Storage_Memcached extends Translation_Storage_Abstract impleme
      * @param string $value
      * @return Translation_Storage_Memcached
      */
-    public function setMemcachedPrefixKey($value) {
+    public function setMemcachedPrefixKey($value)
+    {
         $this->mcPrefixKey = $value;
         return $this;
     }
     
-    public function init() {
+    public function init()
+    {
         if (!$this->memcached) {
             throw new RuntimeException("Couldn't initialize memcached");
         }
@@ -47,18 +53,19 @@ class Translation_Storage_Memcached extends Translation_Storage_Abstract impleme
         return $this;
     }
     
-    private function makeKey($key, $lang) {
+    private function makeKey($key, $lang)
+    {
         return $this->mcPrefixKey . $lang . ':' . md5($key);
     }
     
-    public function get($key, $lang) {
+    public function get($key, $lang)
+    {
         $this->init();
         $memcachedKey = $this->makeKey($key, $lang);
         $res = $this->memcached->get($memcachedKey);
         if ($this->memcached->getResultCode() !== Memcached::RES_NOTFOUND) {
             return $res;
-        }
-        else {
+        } else {
             return false;
         }
     }
@@ -68,7 +75,8 @@ class Translation_Storage_Memcached extends Translation_Storage_Abstract impleme
      * @return array
      * @deprecated since version 5.1
      */
-    public function getAll() {
+    public function getAll()
+    {
         $this->init();
         
         return array();
@@ -82,18 +90,21 @@ class Translation_Storage_Memcached extends Translation_Storage_Abstract impleme
         */
     }
 
-    public function set($key, $lang, $value) {
+    public function set($key, $lang, $value)
+    {
         $this->init();
         $memcachedKey = $this->makeKey($key, $lang);
         $this->memcached->set($memcachedKey, $value);
         return false;
     }
 
-    public function deleteKeys ($keys){
+    public function deleteKeys($keys)
+    {
         // Todo : to be implemented
     }
     
-    public function invert($value, $lang) {
+    public function invert($value, $lang)
+    {
         return false;
     }
 }
