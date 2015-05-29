@@ -1,4 +1,8 @@
 <?php
+
+use Psr\Log\NullLogger;
+use Psr\Log\LoggerInterface;
+
 class Translation_Manager
 {
     const KEY_STORAGE_CACHE_LEVEL1 = 'cache_level1';
@@ -8,6 +12,11 @@ class Translation_Manager
     protected $storages = array();
     protected $notFounds = array();
     protected $enableNotice = true;
+
+    /**
+     * @var Psr\Log\LoggerInterface
+     */
+    private $logger = null;
 
     /**
      * @var Translation_Manager
@@ -22,9 +31,21 @@ class Translation_Manager
     {
         if (!self::$instance) {
             self::$instance = new static();
+            self::$instance->setLogger(new NullLogger());
             self::$instance->registerStorage(self::KEY_STORAGE_CACHE_LEVEL1, new Translation_Storage_RuntimeArray());
         }
         return self::$instance;
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     * @return Translation_Manager
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+
+        return $this;
     }
 
     /**
@@ -241,6 +262,10 @@ class Translation_Manager
 
             if (!$foundTranslation) {
                 $this->addNotFound($key, $lang);
+            }
+
+            if($key === $translated) {
+                $this->logger->warning('Translation not found', array('key' => $key, 'lang' => $lang));
             }
 
             if (!$this->enableNotice) {
