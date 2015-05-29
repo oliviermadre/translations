@@ -24,5 +24,8 @@
         "branch-alias": {
           "dev-master": "2.1.x-dev"
         }
+    },
+    "require": {
+        "psr/log": "^1.0"
     }
 }
