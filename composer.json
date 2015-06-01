@@ -1,7 +1,7 @@
 {
     "name": "evaneos/translations",
     "description": "A tool to improve translation storage",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "type": "library",
     "homepage" : "http://github.com/evaneos/translations",
     "keywords": [],
