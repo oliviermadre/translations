@@ -211,9 +211,10 @@ class Translation_Manager
             $this->addNotFound($key, $lang);
         }
 
-        if($key === $translated) {
-            $this->logger->warning('Translation not found', array('key' => $key, 'lang' => $lang));
-        }
+        // No, if key === $translated does not mean that not translated ...
+        // if($key === $translated) {
+        //     $this->logger->warning('Translation not found', array('key' => $key, 'lang' => $lang));
+        //}
 
         return $translated;
     }
@@ -252,7 +253,7 @@ class Translation_Manager
     {
         $ret = true;
         foreach ($this->storages as $keyStorage => /* @var $storage Translation_Storage_Interface */ $storage) {
-            $res = $storage->deleteKeys($keys);
+            $res = $storage->deleteKeys(array($key));
             if (!$res) {
                 $this->logger->error('Unable to delete translation', array(
                     'key'     => $key,
