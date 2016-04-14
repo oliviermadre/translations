@@ -182,33 +182,53 @@ class Translation_Manager
 
     /**
      * @param string $key
-     * @param string $lang
+     * @param null   $locale
+     * @return string
      */
-    public function translate($key, $lang = null)
+    public function translate($key, $locale = null)
     {
         $translated = $key;
         $foundTranslation = false;
-        $lang = ($lang) ? $lang : $this->locale;
+        $locale = ($locale) ? $locale : $this->locale;
 
         $depthStorages = 1;
+        // try locale
         foreach ($this->storages as /* @var $storage Translation_Storage_Interface */ $storage) {
-            $res = $storage->get($key, $lang);
+
+            $res = $storage->get($key, $locale);
             if ($res !== false) {
                 $translated = $res;
                 $foundTranslation = true;
 
                 if ($depthStorages > 1) {
-                    $this->storeTranslationIntoShallowStorages($depthStorages, $key, $lang, $translated);
+                    $this->storeTranslationIntoShallowStorages($depthStorages, $key, $locale, $translated);
                 }
 
                 break;
             }
-
             $depthStorages++;
+        }
+        if (!$foundTranslation && strlen($locale)== 5) {
+            $depthStorages = 1;
+            // try lang
+            $lang = substr($locale, 0, 2);
+            foreach ($this->storages as /* @var $storage Translation_Storage_Interface */ $storage) {
+                $res = $storage->get($key, $lang);
+                if ($res !== false) {
+                    $translated = $res;
+                    $foundTranslation = true;
+
+                    if ($depthStorages > 1) {
+                        $this->storeTranslationIntoShallowStorages($depthStorages, $key, $lang, $translated);
+                    }
+                    break;
+                }
+                $depthStorages++;
+            }
         }
 
         if (!$foundTranslation) {
-            $this->addNotFound($key, $lang);
+            $this->addNotFound($key, $locale);
         }
 
         // No, if key === $translated does not mean that not translated ...
