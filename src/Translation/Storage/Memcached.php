@@ -97,6 +97,11 @@ class Translation_Storage_Memcached extends Translation_Storage_Abstract impleme
         $memcachedKey = $this->makeKey($key, $lang);
         $md5Key = md5($memcachedKey);
         $this->memcached->set($md5Key, $value);
+
+        if ($this->memcached->getResultCode() === Memcached::RES_SUCCESS) {
+            return true;
+        }
+
         return false;
     }
 
