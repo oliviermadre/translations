@@ -236,7 +236,8 @@ class Translation_Manager
                     'key'     => $key,
                     'value'   => $value,
                     'lang'    => $lang,
-                    'storage' => $keyStorage
+                    'storage' => $keyStorage,
+                    'driver'  => get_class($storage)
                     ));
                 $ret = false;
             }
@@ -259,7 +260,8 @@ class Translation_Manager
                     'key'     => $key,
                     'value'   => $value,
                     'lang'    => $lang,
-                    'storage' => $keyStorage
+                    'storage' => $keyStorage,
+                    'driver'  => get_class($storage)
                     ));
                 $ret = false;
             }
