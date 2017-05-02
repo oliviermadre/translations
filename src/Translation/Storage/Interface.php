@@ -1,5 +1,6 @@
 <?php
-interface Translation_Storage_Interface {
+interface Translation_Storage_Interface
+{
     /**
      * Retrieve a key by its translation from the storage
      * @param string $value
@@ -30,5 +31,5 @@ interface Translation_Storage_Interface {
      * Delete all the stored keys
      * @param array $keys
      */
-    public function deleteKeys ($keys);
+    public function deleteKeys($keys);
 }
