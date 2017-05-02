@@ -1,12 +1,21 @@
 <?php
-class Translation_Manager {
+
+use Psr\Log\NullLogger;
+use Psr\Log\LoggerInterface;
+
+class Translation_Manager
+{
     const KEY_STORAGE_CACHE_LEVEL1 = 'cache_level1';
 
     private $locale;
 
     protected $storages = array();
     protected $notFounds = array();
-    protected $enableNotice = true;
+
+    /**
+     * @var Psr\Log\LoggerInterface
+     */
+    private $logger = null;
 
     /**
      * @var Translation_Manager
@@ -17,12 +26,25 @@ class Translation_Manager {
      *
      * @return Translation_Manager
      */
-    public static function getInstance() {
+    public static function getInstance()
+    {
         if (!self::$instance) {
             self::$instance = new static();
+            self::$instance->setLogger(new NullLogger());
             self::$instance->registerStorage(self::KEY_STORAGE_CACHE_LEVEL1, new Translation_Storage_RuntimeArray());
         }
         return self::$instance;
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     * @return Translation_Manager
+     */
+    public function setLogger(LoggerInterface $logger)
+    {
+        $this->logger = $logger;
+
+        return $this;
     }
 
     /**
@@ -30,7 +52,8 @@ class Translation_Manager {
      * @param string $name
      * @param Translation_Storage_Interface $instance
      */
-    public function registerStorage($name, Translation_Storage_Interface $instance) {
+    public function registerStorage($name, Translation_Storage_Interface $instance)
+    {
         $this->storages[$name] = $instance;
     }
 
@@ -39,7 +62,8 @@ class Translation_Manager {
      * @return Translation_Manager
      * @throws LogicException
      */
-    public function setDefaultLanguage($lang) {
+    public function setDefaultLanguage($lang)
+    {
         $this->setLocale($lang);
 
         return $this;
@@ -51,7 +75,8 @@ class Translation_Manager {
      * @param  string          $locale      the application locale
      * @throws LogicException               the locale is null or is not a string
      */
-    public function setLocale($locale) {
+    public function setLocale($locale)
+    {
         if (!$locale || !is_string($locale)) {
             throw new LogicException('Language must be a string, usually an iso2 code');
         }
@@ -62,19 +87,16 @@ class Translation_Manager {
     /**
      * Get the locale
      */
-    public function getLocale() {
+    public function getLocale()
+    {
         return $this->locale;
-    }
-
-    public function setEnableNotice($bool) {
-        $this->enableNotice = (bool)$bool;
-        return $this;
     }
 
     /**
      * @return array
      */
-    public function dumpCacheLevel1() {
+    public function dumpCacheLevel1()
+    {
         return $this->getCacheLevel1()->getAll();
     }
 
@@ -82,7 +104,8 @@ class Translation_Manager {
      *
      * @return Translation_Storage_RuntimeArray
      */
-    protected function getCacheLevel1() {
+    protected function getCacheLevel1()
+    {
         return $this->storages[self::KEY_STORAGE_CACHE_LEVEL1];
     }
 
@@ -90,49 +113,34 @@ class Translation_Manager {
      * @param string $key
      * @param string $lang
      */
-    protected function addNotFound($key, $lang) {
-        try {
-            if (!$this->enableNotice) {
-                set_error_handler(function($errno, $errstr, $errfile, $errline) {});
-            }
-
-            trigger_error("Translation error, key not found '" . $key . "' (lang = '" . $lang . "')", E_USER_NOTICE);
-            if (!array_key_exists($key, $this->notFounds)) {
-                $this->notFounds[$key] = array();
-            }
-
-            if (!in_array($lang, $this->notFounds[$key])) {
-                $this->notFounds[$key][] = $lang;
-            }
-
-            if (!$this->enableNotice) {
-                restore_error_handler();
-            }
-
-            $this->storeTranslation($key, $lang, $key);
-
-            return $this;
+    protected function addNotFound($key, $lang)
+    {
+        if (!array_key_exists($key, $this->notFounds)) {
+            $this->notFounds[$key] = array();
         }
-        catch(Exception $e) {
-            if (!$this->enableNotice) {
-                restore_error_handler();
-            }
 
-            throw $e;
+        if (!in_array($lang, $this->notFounds[$key])) {
+            $this->notFounds[$key][] = $lang;
         }
+
+        $this->storeTranslation($key, $lang, $key);
+
+        return $this;
     }
 
     /**
      * @return array
      */
-    public function getNotFounds() {
+    public function getNotFounds()
+    {
         return $this->notFounds;
     }
 
     /**
      * @return int
      */
-    public function countNotFounds() {
+    public function countNotFounds()
+    {
         return count($this->notFounds);
     }
 
@@ -144,53 +152,30 @@ class Translation_Manager {
      * @param string $translation
      * @return boolean
      */
-    protected function storeTranslationIntoShallowStorages($depth, $key, $lang, $translation) {
-        try {
-            if (!$this->enableNotice) {
-                set_error_handler(function($errno, $errstr, $errfile, $errline) {});
-            }
-
-            $i = 1;
-            reset($this->storages);
-            while($i < $depth) {
-                $storage = current($this->storages);
-                $storage->set($key, $lang, $translation);
-                next($this->storages);
-                $i++;
-            }
-
-            if (!$this->enableNotice) {
-                restore_error_handler();
-            }
-
-            return true;
+    protected function storeTranslationIntoShallowStorages($depth, $key, $lang, $translation)
+    {
+        $i = 1;
+        reset($this->storages);
+        while ($i < $depth) {
+            $storage = current($this->storages);
+            $storage->set($key, $lang, $translation);
+            next($this->storages);
+            $i++;
         }
-        catch (Exception $e) {
-            if (!$this->enableNotice) {
-                restore_error_handler();
-            }
 
-            throw $e;
-        }
+        return true;
     }
 
-    public function invert($value, $lang = null) {
-        foreach($this->storages as /* @var $storage Translation_Storage_Interface */ $storage) {
+    public function invert($value, $lang = null)
+    {
+        foreach ($this->storages as /* @var $storage Translation_Storage_Interface */ $storage) {
             $res = $storage->invert($value, $lang);
             if ($res !== false) {
                 return $res;
             }
         }
 
-        if (!$this->enableNotice) {
-            set_error_handler(function($errno, $errstr, $errfile, $errline) {});
-        }
-
-        trigger_error("Couldn't find revert translation for '" . $value . "' in lang '" . $lang . "'", E_USER_NOTICE);
-
-        if (!$this->enableNotice) {
-            restore_error_handler();
-        }
+        $this->logger->info('Unable to find revert translation', array('value' => $value, 'lang' => $lang));
 
         return $value;
     }
@@ -199,50 +184,39 @@ class Translation_Manager {
      * @param string $key
      * @param string $lang
      */
-    public function translate($key, $lang = null) {
-        try {
-            if (!$this->enableNotice) {
-                set_error_handler(function($errno, $errstr, $errfile, $errline) {});
-            }
+    public function translate($key, $lang = null)
+    {
+        $translated = $key;
+        $foundTranslation = false;
+        $lang = ($lang) ? $lang : $this->locale;
 
-            $translated = $key;
-            $foundTranslation = false;
-            $lang = ($lang) ? $lang : $this->locale;
+        $depthStorages = 1;
+        foreach ($this->storages as /* @var $storage Translation_Storage_Interface */ $storage) {
+            $res = $storage->get($key, $lang);
+            if ($res !== false) {
+                $translated = $res;
+                $foundTranslation = true;
 
-            $depthStorages = 1;
-            foreach($this->storages as /* @var $storage Translation_Storage_Interface */ $storage) {
-                $res = $storage->get($key, $lang);
-                if ($res !== false) {
-                    $translated = $res;
-                    $foundTranslation = true;
-
-                    if ($depthStorages > 1) {
-                        $this->storeTranslationIntoShallowStorages($depthStorages, $key, $lang, $translated);
-                    }
-
-                    break;
+                if ($depthStorages > 1) {
+                    $this->storeTranslationIntoShallowStorages($depthStorages, $key, $lang, $translated);
                 }
 
-                $depthStorages++;
+                break;
             }
 
-            if (!$foundTranslation) {
-                $this->addNotFound($key, $lang);
-            }
-
-            if (!$this->enableNotice) {
-                restore_error_handler();
-            }
-
-            return $translated;
+            $depthStorages++;
         }
-        catch(Exception $e) {
-            if (!$this->enableNotice) {
-                restore_error_handler();
-            }
 
-            throw $e;
+        if (!$foundTranslation) {
+            $this->addNotFound($key, $lang);
         }
+
+        // No, if key === $translated does not mean that not translated ...
+        // if($key === $translated) {
+        //     $this->logger->warning('Translation not found', array('key' => $key, 'lang' => $lang));
+        //}
+
+        return $translated;
     }
 
     /**
@@ -252,69 +226,48 @@ class Translation_Manager {
      * @param string $value
      * @return boolean
      */
-    public function storeTranslation($key, $lang, $value = "") {
-        try {
-            if (!$this->enableNotice) {
-                set_error_handler(function($errno, $errstr, $errfile, $errline) {});
+    public function storeTranslation($key, $lang, $value = "")
+    {
+        $ret = true;
+        foreach ($this->storages as $keyStorage => /* @var $storage Translation_Storage_Interface */ $storage) {
+            $res = $storage->set($key, $lang, $value);
+            if (!$res) {
+                $this->logger->error('Unable to store translation', array(
+                    'key'     => $key,
+                    'value'   => $value,
+                    'lang'    => $lang,
+                    'storage' => $keyStorage,
+                    'driver'  => get_class($storage)
+                    ));
+                $ret = false;
             }
-
-            $ret = true;
-            foreach($this->storages as $keyStorage => /* @var $storage Translation_Storage_Interface */ $storage) {
-                $res = $storage->set($key, $lang, $value);
-                if (!$res) {
-                    trigger_error("Translation of '" . $key . "' ( " . $lang . ") = '" . $value . "' not saved in storage '" . $keyStorage . "'", E_USER_NOTICE);
-                    $ret = false;
-                }
-            }
-
-            if (!$this->enableNotice) {
-                restore_error_handler();
-            }
-
-
-            return $ret;
         }
-        catch(Exception $e) {
-            if (!$this->enableNotice) {
-                restore_error_handler();
-            }
 
-            throw $e;
-        }
+        return $ret;
     }
 
     /**
      *
      * @param array $keys
      */
-    public function deleteKeys($key, $lang, $value = "") {
-        try {
-            if (!$this->enableNotice) {
-                set_error_handler(function($errno, $errstr, $errfile, $errline) {});
+    public function deleteKeys($key, $lang, $value = "")
+    {
+        $ret = true;
+        foreach ($this->storages as $keyStorage => /* @var $storage Translation_Storage_Interface */ $storage) {
+            $res = $storage->deleteKeys(array($key));
+            if (!$res) {
+                $this->logger->error('Unable to delete translation', array(
+                    'key'     => $key,
+                    'value'   => $value,
+                    'lang'    => $lang,
+                    'storage' => $keyStorage,
+                    'driver'  => get_class($storage)
+                    ));
+                $ret = false;
             }
-
-            $ret = true;
-            foreach($this->storages as $keyStorage => /* @var $storage Translation_Storage_Interface */ $storage) {
-                $res = $storage->deleteKeys($keys);
-                if (!$res) {
-                    trigger_error("Unable of '" . $key . "' ( " . $lang . ") = '" . $value . "' not saved in storage '" . $keyStorage . "'", E_USER_NOTICE);
-                    $ret = false;
-                }
-            }
-
-            if (!$this->enableNotice) {
-                restore_error_handler();
-            }
-
-
-            return $ret;
         }
-        catch(Exception $e) {
-            if (!$this->enableNotice) {
-                restore_error_handler();
-            }
 
-            throw $e;
-        }
+
+        return $ret;
     }
 }
