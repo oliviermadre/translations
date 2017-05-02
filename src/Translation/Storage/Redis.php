@@ -1,17 +1,19 @@
 <?php
+
 class Translation_Storage_Redis extends Translation_Storage_Abstract implements Translation_Storage_Interface
 {
     protected $redisInstance = null;
     protected $host = null;
     protected $port = null;
     protected $redisKnownKeys = 'REDIS_CACHE_KNOWN_KEYS';
-    
+    protected $redisPrefixKey = 'TR:REDIS:STORE:';
+
     public function __construct($host = '127.0.0.1', $port = 6379)
     {
         $this->host = $host;
         $this->port = $port;
     }
-    
+
     /**
      * @param Redis $instance
      * @return Translation_Storage_Redis
@@ -21,7 +23,7 @@ class Translation_Storage_Redis extends Translation_Storage_Abstract implements 
         $this->redisInstance = $instance;
         return $this;
     }
-    
+
     /**
      * @param string $value
      * @return Translation_Storage_Redis
@@ -31,22 +33,32 @@ class Translation_Storage_Redis extends Translation_Storage_Abstract implements 
         $this->redisKnownKeys = $value;
         return $this;
     }
-    
+
     public function init()
     {
         if (!$this->redisInstance && $this->host && $this->port) {
-            $redisInstance = new Redis($this->host, $this->port);
+            $redisInstance = new Redis();
+            $redisInstance->connect($this->host, $this->port);
             $this->setRedisInstance($redisInstance);
+        }
+        if (!$this->redisInstance) {
+            throw new RuntimeException("Couldn't initialize Redis");
         }
         return $this;
     }
-    
-    
+
+    private function makeKey($key, $lang)
+    {
+        return $this->redisPrefixKey . $lang . ':' . md5($key);
+    }
+
     public function get($key, $lang)
     {
         $this->init();
-        $this->redisInstance->hGet($key, $lang);
-        return false;
+        $redisKey = $this->makeKey($key, $lang);
+        $md5Key = md5($redisKey);
+        $res = $this->redisInstance->get($md5Key);
+        return $res;
     }
 
     public function getAll()
@@ -63,13 +75,19 @@ class Translation_Storage_Redis extends Translation_Storage_Abstract implements 
     public function set($key, $lang, $value)
     {
         $this->init();
-        $this->redisInstance->hSet($key, $lang, $value);
-        $this->redisInstance->hSet($this->redisKnownKeys, $key, 1);
+        $redisKey = $this->makeKey($key, $lang);
+        $md5Key = md5($redisKey);
+        $set = $this->redisInstance->set($md5Key, $value);
+
+        if ($set === 'OK') {
+            return true;
+        }
         return false;
     }
 
     public function deleteKeys($keys)
     {
+        // Todo : to be implemented
     }
 
     public function invert($value, $lang)
